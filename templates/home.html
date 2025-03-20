@@ -1,21 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
- {% if user.is_authenticated %}
- <h1>hello world</h1>
- 
- {% else %}
-<div class="container d-flex justify-content-center min-vh-100 align-items-center">
-<form method="post" action="{% url "home" %}" class="col-md-4 ">
-  {% csrf_token %} 
-    <div class="mb-3">
-      <label for="exampleInputEmail1" class="form-label">Username</label>
-      <input type="text" class="form-control" required name="Username" aria-describedby="emailHelp">
-    <div class="mb-3">
-      <label for="exampleInputPassword1" class="form-label">Password</label>
-      <input type="password" class="form-control" required name="password" >
-    </div>
-    <button type="Submit" class="container btn btn-primary">login</button>
-  </form>
-</div>
-{% endif %}
-{% endblock content %}
+    {% if user.is_authenticated %}
+        <h1>hello world</h1>
+    {% else %}
+        {% if error %}
+        <p class="text-red-500">{{ error }}</p>
+        {% endif %}
+        <form action="{% url "login" %}" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+        </form>
+    {%endif%}
+{% endblock %}

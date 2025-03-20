@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <form action="{% url "register" %}" method="POST">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="text-red-500 text-sm my-2">
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <button type="submit">Register</button>
+
+    </form>
+
+{% endblock %}
