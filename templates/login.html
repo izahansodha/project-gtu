@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <h1>login success </h1>
+    {% else %}
+        {% if error %}
+        <p class="text-red-500">{{ error }}</p>
+        {% endif %}
+        <div class='d-flex justify-content-center align-items-center vh-100' >
+            <form method="POST" class="custom-form p-4 border rounded bg-light shadow">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                    {{ form.username }}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                    {{ form.password }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">login</button>
+            </form>
+    </div>
+    {%endif%}
+{% endblock %}

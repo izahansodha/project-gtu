@@ -1,23 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <form action="{% url "register" %}" method="POST">
+<div class='d-flex justify-content-center align-items-center vh-100'>
+    <form method="POST" class="custom-form p-4 border rounded bg-light shadow">
         {% csrf_token %}
-
-        {{ form.as_p }}
-
-        {% for field in form %}
-            {% if field.errors %}
-                <div class="text-red-500 text-sm my-2">
-                    {% for error in field.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endfor %}
-
-        <button type="submit">Register</button>
-
+        
+        <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+            {{ form.username }}
+        </div>
+    
+        <div class="mb-3">
+            <label for="{{ form.full_name.id_for_label }}" class="form-label">Full Name</label>
+            {{ form.full_name }}
+        </div>
+    
+        <div class="mb-3">
+            <label for="{{ form.role.id_for_label }}" class="form-label">Role</label>
+            {{ form.role }}
+        </div>
+    
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+            {{ form.password1 }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+            {{ form.password2 }}
+        </div>
+    
+        <button type="submit" class="btn btn-primary w-100">Register</button>
     </form>
-
+    
+</div>
 {% endblock %}

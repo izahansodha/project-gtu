@@ -5,11 +5,11 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 class CustomUserCreationForm(UserCreationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'username','class':'mt-2 bg-transparent w-[197px] px-4 py-4 border-gray-500 rounded-lg'}))
-    full_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'full_name','class':'mt-2 bg-transparent w-[197px] px-4 py-4 border-gray-500 rounded-lg'}))
-    role = forms.ChoiceField(choices=custumuser.ROLE_CHOICE,widget=forms.Select(attrs={'placeholder': 'username','class':'mt-2 bg-transparent w-[197px] px-4 py-4 border-gray-500 rounded-lg'}))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'mt-2 bg-transparent w-[197px] px-4 py-4 border-gray-500 rounded-lg'}))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'mt-2 bg-transparent w-[197px] px-4 py-4 border-gray-500 rounded-lg'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'username','class':'form-control'}))
+    full_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'full_name','class':'form-control '}))
+    role = forms.ChoiceField(choices=custumuser.ROLE_CHOICE,widget=forms.Select(attrs={'placeholder': 'username','class':'form-control'}))
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'}))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'form-control'}))
 
     class Meta:
         model = custumuser

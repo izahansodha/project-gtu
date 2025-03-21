@@ -21,8 +21,9 @@ from gtu.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',home,name="home"),
+    path('',header,name="header"),
+    path('home/',home,name='home'),
     path('register/',register,name="register"),
-    path('login/', home, name="login"),
-    path('logout/', user_logout, name="logout"),
+    path('login/',login_user, name="login"),
+    path('logout/',user_logout, name="logout"),
 ]

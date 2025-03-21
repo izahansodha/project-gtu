@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser,BaseUserManager,PermissionsMixin
+from django.contrib.auth.models import AbstractUser,BaseUserManager,PermissionsMixin,Group
 
 # Create your models here.
 class custumusermanager(BaseUserManager):
@@ -20,22 +20,22 @@ class custumusermanager(BaseUserManager):
         return self.create_user(username,password,**extra_fields)
 
 class custumuser(AbstractUser,PermissionsMixin):
-    ROLE_CHOICE = [
-        ('admin','admin'),
-        ('gtu_cordinator','gtu_cordinator'),
-        ('department','department')
-    ]
-    username = models.CharField(max_length=50,unique=True)
-    full_name = models.CharField(max_length=200)
-    role = models.CharField(max_length=50,choices=ROLE_CHOICE)
+        ROLE_CHOICE = [
+            ('admin','admin'),
+            ('gtu_cordinator','gtu_cordinator'),
+            ('department','department')
+        ]
+        username = models.CharField(max_length=50,unique=True)
+        full_name = models.CharField(max_length=200)
+        role = models.CharField(max_length=50,choices=ROLE_CHOICE)
 
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    objects = custumusermanager()
+        is_active = models.BooleanField(default=True)
+        is_staff = models.BooleanField(default=False)
+        objects = custumusermanager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+        USERNAME_FIELD = 'username'
+        REQUIRED_FIELDS = []
 
-    def  __str__(self):
-        return self.username
-    
+        def  __str__(self):
+            return self.username,self.role
+        

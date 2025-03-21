@@ -1,15 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
     {% if user.is_authenticated %}
-        <h1>hello world</h1>
+        <h1>logeed in  world</h1>
     {% else %}
-        {% if error %}
-        <p class="text-red-500">{{ error }}</p>
-        {% endif %}
-        <form action="{% url "login" %}" method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-        </form>
+    
     {%endif%}
 {% endblock %}
