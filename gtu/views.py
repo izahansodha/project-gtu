@@ -1,8 +1,18 @@
 from django.http import response
-from django.shortcuts import render,redirect,HttpResponse
-from .forms import CustomUserCreationForm,CustomLoginForm
+from django.shortcuts import render,redirect,HttpResponse, get_object_or_404
+from .forms import CustomUserCreationForm,CustomLoginForm,AdminPasswordChangeForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
+from authenticate.models import custumuser
+from django.contrib import messages
+from .forms import CustomUserUpdateForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+
+
 
 def login_user(request):
     if request.method == 'POST':
@@ -29,6 +39,9 @@ def header(request):
 
     return render(request, "header.html", {'role': role})
 
+def user_record(request):
+    users = custumuser.objects.all()  #Fetch all users
+    return render(request, 'user.html', {'users': users})
 
 
 def user_logout(request):
@@ -36,8 +49,8 @@ def user_logout(request):
     return redirect('home')
 
 def home(request):
-    return render(request,'home.html')
-
+    users = custumuser.objects.all()  # Fetch all users
+    return render(request, 'home.html', {'users': users}) 
 
 def register(request):
     if request.method == 'POST':
@@ -78,4 +91,61 @@ def register(request):
         form = CustomUserCreationForm()
     
     return render(request, 'register.html', {'form': form})
+
+def user_data(request,pk):
+    if request.user.is_authenticated:
+           user_record = custumuser.objects.get(id=pk)
+           return render(request,'user_data.html',{'user_record':user_record})
+    else:
+        messages.success(request,"you must be login to view this page")
+        return redirect('home')
+    
+
+def update_record(request,pk):
+    if request.user.is_authenticated:
+        current_record = custumuser.objects.get(id=pk)
+        form = CustomUserCreationForm(request.POST or None,instance=current_record)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"Record update Successfully ...")
+            return redirect('user')
+        return render(request,'update_user.html',{'form':form})
+    else:
+       messages.success(request,"you must be login to do that thing...")
+       return render('user.html')
+    
+
+
+
+def edit_user(request, user_id):
+    user = get_object_or_404(custumuser, id=user_id)  # Get user by ID
+
+    if request.method == 'POST':
+        form = CustomUserUpdateForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()  # Save updated user data
+            return redirect('home')  # Redirect after successful edit
+    else:
+        form = CustomUserUpdateForm(instance=user)
+
+    return render(request, 'edit-user.html', {'form': form})
+
+User = get_user_model()
+
+@login_required
+def change_user_password(request, user_id):
+    if not request.user.is_superuser:  # Ensure only admins can change passwords
+        return redirect('home')
+
+    user = get_object_or_404(User, id=user_id)  # Get the user by ID
+
+    if request.method == 'POST':
+        form = AdminPasswordChangeForm(request.POST, user=user)
+        if form.is_valid():
+            form.save()
+            return redirect('home')  # Redirect after successful update
+    else:
+        form = AdminPasswordChangeForm(user=user)
+
+    return render(request, 'change_password.html', {'form': form, 'user': user})
 

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class=" card col-md-6 offset-md-3">
+    <div class="card-header">
+        {{ user_record.username }} 
+    </div>
+    <div class="card-body">
+        <p class="card-text">
+        <strong>ID :</strong>{{ user_record.id }}    <br> 
+        <strong>Username :</strong>{{ user_record.username }}    <br>  
+        <strong>Role :</strong>{{ user_record.role }}    <br>  
+        <strong>Full Name :</strong>{{ user_record.full_name }}    <br>     
+        </p>   
+    </div>
+    <a href="{% url 'user_record' %}" class='btn btn-secondary'>back</a> 
+    <a href="{% url 'edit-user' user_record.id  %}" class='btn btn-success'>update</a>
+</div>
+{% endblock %}

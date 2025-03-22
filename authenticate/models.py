@@ -37,5 +37,4 @@ class custumuser(AbstractUser,PermissionsMixin):
         REQUIRED_FIELDS = []
 
         def  __str__(self):
-            return self.username,self.role
-        
+            return self.username

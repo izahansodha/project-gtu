@@ -23,7 +23,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',header,name="header"),
     path('home/',home,name='home'),
+    path('user_record/',user_record,name='user_record'),
     path('register/',register,name="register"),
     path('login/',login_user, name="login"),
     path('logout/',user_logout, name="logout"),
+    path('user_data/<int:pk>',user_data,name='user_data'),
+    path('edit-user/<int:user_id>/', edit_user, name='edit-user'),
+    path('change-password/<int:user_id>/', change_user_password, name='change_user_password'),
 ]
+
+
