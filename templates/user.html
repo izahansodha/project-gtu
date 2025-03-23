@@ -15,7 +15,6 @@
             <th>Password Change<th>
         </thead>
     </tr>
-
         {% for user in users %}
         <tr>
             <td><a href='{% url 'user_data' user.id  %}'> {{ user.id }} </a></td>

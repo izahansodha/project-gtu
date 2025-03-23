@@ -30,7 +30,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-
+import pymysql
+pymysql.install_as_MySQLdb()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -86,7 +87,7 @@ DATABASES = {
 		'ENGINE': 'django.db.backends.mysql',
 		'NAME': 'gtu',
 		'USER': 'root',
-		'PASSWORD': '7867',
+		'PASSWORD': '',
 		'HOST':'127.0.0.1',
 		'PORT':'3306',
 	}
