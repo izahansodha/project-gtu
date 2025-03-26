@@ -21,9 +21,9 @@ class custumusermanager(BaseUserManager):
 
 class custumuser(AbstractUser,PermissionsMixin):
         ROLE_CHOICE = [
-            ('admin','admin'),
-            ('gtu_cordinator','gtu_cordinator'),
-            ('department','department')
+            ('admin','Admin'),
+            ('gtu_cordinator','GTU Coordinator'),
+            ('department','Department')
         ]
         username = models.CharField(max_length=50,unique=True)
         full_name = models.CharField(max_length=200)
@@ -34,7 +34,7 @@ class custumuser(AbstractUser,PermissionsMixin):
         objects = custumusermanager()
 
         USERNAME_FIELD = 'username'
-        REQUIRED_FIELDS = []
+        REQUIRED_FIELDS = ['full_name', 'role']
 
         def  __str__(self):
             return self.username

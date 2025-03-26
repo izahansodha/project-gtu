@@ -10,7 +10,7 @@
         <strong>Username :</strong>{{ user_record.username }}    <br>  
         <strong>Role :</strong>{{ user_record.role }}    <br>  
         <strong>Full Name :</strong>{{ user_record.full_name }}    <br>     
-        </p>   
+        </p>
     </div>
     <a href="{% url 'user_record' %}" class='btn btn-secondary'>back</a> 
     <a href="{% url 'edit-user' user_record.id  %}" class='btn btn-success'>update</a>

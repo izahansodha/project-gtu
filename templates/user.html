@@ -13,15 +13,16 @@
             <th>Full Name</th>
             <th>Role</th>
             <th>Password Change<th>
+        </tr>
         </thead>
-    </tr>
         {% for user in users %}
         <tr>
-            <td><a href='{% url 'user_data' user.id  %}'> {{ user.id }} </a></td>
+            <td><a> {{ user.id }} </a></td>
             <td>{{ user.username }}</td>
             <td>{{ user.full_name }}</td>
             <td>{{ user.role }}</td>
-            <td><a class='btn btn-primary' href='{% url 'change_user_password' user.id  %}'> change password </a></td>
+            <td><a class='btn btn-primary' href='{% url "change_user_password" user.id %}'>Change Password</a></td>
+            <td><a class='btn btn-primary' href='{% url "edit-user" user.id  %}'>edit</a></td>
         </tr>
         {% empty %}
         <tr>
