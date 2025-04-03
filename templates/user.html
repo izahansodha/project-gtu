@@ -12,7 +12,8 @@
             <th>Username</th>
             <th>Full Name</th>
             <th>Role</th>
-            <th>Password Change<th>
+            <th>Password Change</th>
+            <th>Edit</th>
         </tr>
         </thead>
         {% for user in users %}
@@ -21,8 +22,8 @@
             <td>{{ user.username }}</td>
             <td>{{ user.full_name }}</td>
             <td>{{ user.role }}</td>
-            <td><a class='btn btn-primary' href='{% url "change_user_password" user.id %}'>Change Password</a></td>
-            <td><a class='btn btn-primary' href='{% url "edit-user" user.id  %}'>edit</a></td>
+            <td><a class='btn btn-warning' href='{% url "change_user_password" user.id %}'>Change Password</a></td>
+            <td><a class='btn btn-success' href='{% url "edit-user" user.id  %}'>edit</a></td>
         </tr>
         {% empty %}
         <tr>

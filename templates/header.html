@@ -31,8 +31,7 @@
                                 Admin
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-purple">
-                                <li><a class="dropdown-item" href="{% url 'user_record' %}">View Users</a></li>
-                                <li><a class="dropdown-item" href="#">Password reset</a></li>
+                                <li><a class="dropdown-item" href="{% url 'user_record' %}">View Users</a></li>     
                             </ul>
                         </div>
                         {% endif %}
@@ -44,9 +43,7 @@
                         {% if role == 'admin' or role == 'gtu_cordinator' or role == 'department' %}
                             <a class="nav-link" href="#">GTU Viva</a>
                         {% endif %}
-
                         <a class="nav-link btn btn-danger" href="{% url 'logout' %}">Log out</a>
-
                     {% else %}
                         <a class="nav-link btn btn-primary" href="{% url 'login' %}">Log in</a>
                     {% endif %}

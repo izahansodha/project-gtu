@@ -66,8 +66,6 @@ def register(request):
             if not user.role:  # Ensure a role is set
                 user.role = 'department'  # Set default role if missing
 
-            print(f"User Role Before Save: {user.role}")  # Debugging
-
             user.set_password(form.cleaned_data['password1'])  # Hash the password
             user.save()  # Now save the user
 
@@ -82,12 +80,8 @@ def register(request):
             if group_name:
                 group, _ = Group.objects.get_or_create(name=group_name)
                 user.groups.add(group)
-
-            print(f"User Role After Save: {user.role}")  # Debugging
-            print(f"Assigned Group: {group_name}")  # Debugging
-
-            login(request, user)
-            return redirect('home')
+            #login(request, user)
+            return redirect('user_record')
 
         else:
             print(form.errors)  # Debugging: Print errors to console
