@@ -1,0 +1,6 @@
+<select name="time_id" id="id_time_id" class="form-control">
+<!--    <option value="">-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+    {% for time in times %}
+    <option value="{{ time.id }}">{{ time.time }}</option>
+    {% endfor %}
+</select>

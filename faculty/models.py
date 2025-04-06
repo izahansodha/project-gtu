@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 class exam_name(models.Model):
-    exam = models.CharField(max_length=50)
+    exam = models.CharField(max_length=50, unique=True)
     center_incharge = models.IntegerField()
     gtu_co = models.IntegerField()
     sr_sup = models.IntegerField()
@@ -15,11 +15,14 @@ class exam_name(models.Model):
     sweeper = models.IntegerField()
     page_amount = models.IntegerField()
 
+    def __str__(self):
+        return self.exam
+
 
 class department(models.Model):
     department_name = models.CharField(max_length=50)
 
-    def _str_(self):
+    def __str__(self):
         return self.department_name
 
 class faculty(models.Model):
@@ -32,11 +35,14 @@ class faculty(models.Model):
     ifsc = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.full_name
+
 
 class session(models.Model):
     session = models.CharField(max_length=50)
 
-    def _str_(self):
+    def __str__(self):
         return self.session
 
 
@@ -44,10 +50,21 @@ class time(models.Model):
     session_id = models.ForeignKey(session, on_delete=models.CASCADE)
     time = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.time
+
 
 class duty_type(models.Model):
     duty = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.duty
+
 
 class semester(models.Model):
     sem = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.sem
+
+

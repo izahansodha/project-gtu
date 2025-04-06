@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-import pymysql
-pymysql.install_as_MySQLdb()
+# import pymysql
+# pymysql.install_as_MySQLdb()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
 ]
 EXTERNAL_APP = [
     'authenticate',
-    'faculty'
+    'faculty',
+    'GTUEntry',
 ]
 INSTALLED_APPS = INSTALLED_APPS + EXTERNAL_APP
 

@@ -21,7 +21,7 @@ from authenticate import views
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path('',views.header,name="header"),
+    path('',views.login_user,name="login"),
     path('home/',views.home,name='home'),
     path('user_record/',views.user_record,name='user_record'),
     path('register/',views.register,name="register"),

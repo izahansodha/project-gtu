@@ -67,10 +67,3 @@ class AdminPasswordChangeForm(forms.Form):
     def save(self):
         self.user.set_password(self.cleaned_data["new_password"])
         self.user.save()
-
-
-
-
-
-
-
