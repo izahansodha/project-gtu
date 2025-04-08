@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+
+<style>
+    th.asc::after {
+        content: " 🔼";
+    }
+
+    th.desc::after {
+        content: " 🔽";
+    }
+</style>
+
+<!-- Add similar styles and scripts if needed -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="container mt-4">
+    <div class="row">
+    <h3>Theory Exam CP Data</h3>
+
+    <!-- Exam Filter Dropdown -->
+    <form class="form-inline mb-3">
+        <label class="me-2"><strong>Select Exam:</strong></label>
+        <select name="exam_id" class="form-select w-auto d-inline-block"
+                hx-get="{% url 'cp_exam_views' %}"
+                hx-target="#cpTableBody"
+                hx-swap="innerHTML"
+                hx-trigger="change">
+            <option value="">-- All Exams --</option>
+            {% for e in exams_list %}
+                <option value="{{ e.id }}">{{ e }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Exam</th>
+                    <th>Date</th>
+                    <th>Session</th>
+                    <th>Semester</th>
+                    <th>Total Pages</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody id="cpTableBody">
+                {% include '_cp_table_partial.html' %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+{% else %}
+<div class="alert alert-warning">You need to be logged in to view this page.</div>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('th').forEach(function (header, index) {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function () {
+                const table = header.closest('table');
+                const rows = Array.from(table.querySelectorAll('tbody > tr')).filter(r => r.querySelector('td'));
+                const isAscending = header.classList.contains('asc');
+
+                rows.sort((a, b) => {
+                    const cellA = a.children[index].innerText.trim();
+                    const cellB = b.children[index].innerText.trim();
+
+                    return isAscending
+                        ? cellA.localeCompare(cellB, undefined, { numeric: true })
+                        : cellB.localeCompare(cellA, undefined, { numeric: true });
+                });
+
+                // Remove existing sort indicators
+                table.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+                // Toggle the clicked one
+                header.classList.toggle('asc', !isAscending);
+                header.classList.toggle('desc', isAscending);
+
+                // Re-append rows in sorted order
+                rows.forEach(row => table.querySelector('tbody').appendChild(row));
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -17,6 +17,15 @@
         .bd-custom {
             background-color: #DEDAEB;
         }
+        .dropdown-menu.dropdown-purple .dropdown-item:hover {
+            background-color: #4e3a7d;  /* Slightly lighter/different shade */
+            color: #ECB602;
+            font-weight: bold;
+        }
+        .navbar-purple .nav-link:hover {
+            color: #ECB602;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="bd-custom">
@@ -40,7 +49,7 @@
                                 <li><a class="dropdown-item" href="{% url 'add_exam' %}">Add Exam Details</a></li>
 
                                 <!-- Faculty Management Links -->
-                                <li><hr class="dropdown-divider"></li>
+                                <li><hr class="dropdown-divider border-light"></li>
                                 <li><a class="dropdown-item" href="{% url 'faculty_list' %}">View Faculties</a></li>
                                 <li><a class="dropdown-item" href="{% url 'department_list' %}">View Departments</a></li>
 
@@ -55,15 +64,14 @@
                                 GTU Theory Entry
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-purple">
-                                <li><a class="dropdown-item" href="{% url 'exam_data' %}">Add GTU Theory Entry</a></li>
-                                <li><a class="dropdown-item" href="{% url "exam_entry" %}">View Entry</a></li>
-                                <li><a class="dropdown-item" href="{% url "exam_views" %}">edit exam</a></li>
+                                <li><a class="dropdown-item" href="{% url 'exam_data' %}">Add GTU Theory Exam Entry</a></li>
+                                <li><a class="dropdown-item" href="{% url 'exam_views' %}">View GTU Theory Exam Entry</a></li>
 <!--                                <li><a class="dropdown-item" href="#">Add Exam Details</a></li>-->
 
                                 <!-- Faculty Management Links -->
-<!--                                <li><hr class="dropdown-divider"></li>-->
-<!--                                <li><a class="dropdown-item" href="{% url 'faculty_list' %}">View Faculties</a></li>-->
-<!--                                <li><a class="dropdown-item" href="{% url 'department_list' %}">View Departments</a></li>-->
+                                <li><hr class="dropdown-divider border-light"></li>
+                                <li><a class="dropdown-item" href="{% url 'add_gtu_exam_cp' %}">Add Exam CP Bill Info</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cp_exam_views' %}">View Exam CP Bill</a></li>
 
 
                             </ul>

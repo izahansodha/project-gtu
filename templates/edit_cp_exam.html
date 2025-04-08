@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class='d-flex justify-content-center align-items-center vh-100'>
+    <form method="POST" class="custom-form p-4 border rounded bg-light shadow" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+        <h2 class="text-center mb-4">Edit CP Exam Info</h2>
+        {% csrf_token %}
+        {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        {{ error }}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-4">{{ field.label_tag }}</div>
+            <div class="col-md-8">
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a href="{% url 'cp_exam_views' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% else %}
+<div class="alert alert-warning">You need to be logged in to view this page.</div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const subjectCount = 12;
+
+    function updateGrandTotal() {
+        let grandTotal = 0;
+        for (let i = 1; i <= subjectCount; i++) {
+            const studentInput = document.getElementById(`id_sub${i}_no_of_student`);
+            const pagesInput = document.getElementById(`id_sub${i}_no_of_pages`);
+
+            const students = parseInt(studentInput?.value) || 0;
+            const pages = parseInt(pagesInput?.value) || 0;
+
+            grandTotal += students * pages;
+        }
+
+        const grandInput = document.getElementById("id_total_pages");
+        if (grandInput) {
+            grandInput.value = grandTotal;
+        }
+    }
+
+    for (let i = 1; i <= subjectCount; i++) {
+        const studentInput = document.getElementById(`id_sub${i}_no_of_student`);
+        const pagesInput = document.getElementById(`id_sub${i}_no_of_pages`);
+
+        studentInput?.addEventListener("input", updateGrandTotal);
+        pagesInput?.addEventListener("input", updateGrandTotal);
+    }
+
+    // Initial calculation in case values are pre-filled
+    updateGrandTotal();
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <form method="POST" class="custom-form p-4 border rounded bg-light shadow" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+            <h2 class="text-center mb-4">Add Exam CP Data</h2>
+            {% csrf_token %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Static fields -->
+            <div class="mb-3 row">
+                <div class="col-md-4">
+                    {{ form.exam_id.label_tag }}
+                </div>
+                <div class="col-md-8">
+                    {{ form.exam_id }}
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="col-md-4">
+                    {{ form.session_id.label_tag }}
+                </div>
+                <div class="col-md-8">
+                    {{ form.session_id }}
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="col-md-4">
+                    {{ form.semester_id.label_tag }}
+                </div>
+                <div class="col-md-8">
+                    {{ form.semester_id }}
+                </div>
+            </div>
+
+            <!-- Loop through dynamic subject fields -->
+            {% for field_name, field in subject_field_data.items %}
+                <div class="mb-3 row">
+                    <div class="col-md-4">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-md-8">
+                        {{ field }}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="#" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

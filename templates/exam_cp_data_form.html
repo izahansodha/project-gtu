@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="text-center mb-0">Add GTU Exam CP Data</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'add_gtu_exam_cp' %}" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Error!</strong> Please correct the errors below.
+                    </div>
+                {% endif %}
+
+                <ul class="text-danger">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Basic Information Section -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.exam_id.id_for_label }}" class="form-label">Exam</label>
+                        {{ form.exam_id }}
+                        <div class="invalid-feedback">Please select an exam.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
+                        {{ form.date }}
+                        <div class="invalid-feedback">Please select a valid date.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.session_id.id_for_label }}" class="form-label">Session</label>
+                        {{ form.session_id }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.semester_id.id_for_label }}" class="form-label">Semester</label>
+                        {{ form.semester_id }}
+                    </div>
+                </div>
+
+                <!-- Subjects Section -->
+                <h4 class="mb-3 border-bottom pb-2">Subject Information</h4>
+
+                <div class="row g-3">
+                  {% for i in subject_range %}
+                    {% with i|stringformat:"s" as i_str %}
+                        {% with 'sub_'|add:i_str|add:'_code' as code_name %}
+                        {% with 'sub_'|add:i_str|add:'_name' as name_name %}
+                        {% with 'sub'|add:i_str|add:'_no_of_student' as student_field %}
+                        {% with 'sub'|add:i_str|add:'_no_of_pages' as pages_field %}
+
+                        <div class="col-12 subject-section border p-3 mb-3 rounded">
+                            <h5 class="mb-3">Subject {{ i }}</h5>
+                            <div class="row">
+                                <!-- Subject Code -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_{{ code_name }}" class="form-label">Subject Code</label>
+                                    <input type="text" class="form-control"
+                                        id="id_{{ code_name }}"
+                                        name="{{ code_name }}"
+                                        value="{{ request.POST|get_item:code_name }}">
+                                </div>
+
+                                <!-- Subject Name -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_{{ name_name }}" class="form-label">Subject Name</label>
+                                    <input type="text" class="form-control"
+                                        id="id_{{ name_name }}"
+                                        name="{{ name_name }}"
+                                        value="{{ request.POST|get_item:name_name }}">
+                                </div>
+
+                                <!-- No. of Students -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_{{ student_field }}" class="form-label">No. of Students</label>
+                                    <input type="number" class="form-control student-input"
+                                        id="id_{{ student_field }}"
+                                        name="{{ student_field }}"
+                                        value="{{ request.POST|get_item:student_field }}"
+                                        min="0"
+                                        data-index="{{ i }}">
+                                </div>
+
+                                <!-- No. of Pages -->
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_{{ pages_field }}" class="form-label">No. of Pages</label>
+                                    <input type="number" class="form-control pages-input"
+                                        id="id_{{ pages_field }}"
+                                        name="{{ pages_field }}"
+                                        value="{{ request.POST|get_item:pages_field }}"
+                                        min="0"
+                                        data-index="{{ i }}">
+                                </div>
+
+                                <!-- Total Pages (readonly) -->
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Total Pages</label>
+                                                    <input type="number" class="form-control total-pages" id="total_pages_{{ i }}"
+                                                           name="total_pages_{{ i }}" value="0" readonly>
+                                                </div>
+                            </div>
+                        </div>
+
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endfor %}
+
+
+
+                    <!-- Grand Total Section -->
+                    <div class="col-12 subject-section border p-3 mb-3 rounded bg-light">
+                        <h5 class="text-end">Grand Total Pages</h5>
+                        <div class="row justify-content-end">
+                            <div class="col-md-3">
+                                <input type="number" class="form-control fw-bold text-end" id="grand_total_pages" value="0" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Field for Grand Total -->
+                <input type="hidden" name="total_pages" id="id_total_pages" value="0">
+
+                <!-- Submit & Reset Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg me-md-2">
+                        <i class="bi bi-save-fill me-2"></i>Save Data
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rows = document.querySelectorAll('.subject-section');
+    const grandTotalInput = document.getElementById('grand_total_pages');
+
+    function updateGrandTotal() {
+        let sum = 0;
+        document.querySelectorAll('.total-pages').forEach(input => {
+            sum += parseInt(input.value) || 0;
+        });
+        grandTotalInput.value = sum;
+        // Update hidden input
+        document.getElementById('id_total_pages').value = sum;
+    }
+
+    rows.forEach(row => {
+        const studentInput = row.querySelector('.student-input');
+        const pagesInput = row.querySelector('.pages-input');
+        const totalInput = row.querySelector('.total-pages');
+
+        function updateTotal() {
+            const students = parseInt(studentInput.value) || 0;
+            const pages = parseInt(pagesInput.value) || 0;
+            totalInput.value = students * pages;
+            updateGrandTotal();
+        }
+
+        studentInput.addEventListener('input', updateTotal);
+        pagesInput.addEventListener('input', updateTotal);
+    });
+
+    // Run once on page load
+    updateGrandTotal();
+});
+</script>
+
+<style>
+.subject-section {
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+.subject-section:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

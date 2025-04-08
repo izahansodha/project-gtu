@@ -1,0 +1,16 @@
+{% for cp in cp_data %}
+<tr>
+    <td>{{ cp.exam_id }}</td>
+    <td>{{ cp.date|date:"d-m-Y" }}</td>
+    <td>{{ cp.session_id }}</td>
+    <td>{{ cp.semester_id }}</td>
+    <td>{{ cp.total_pages }}</td>
+    <td>
+        <a class="btn btn-warning btn-sm" href="{% url 'edit_cp_exam' cp.id %}">Edit</a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="6">No CP records found.</td>
+</tr>
+{% endfor %}

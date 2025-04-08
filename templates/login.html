@@ -4,7 +4,10 @@
         <h1>login success </h1>
     {% else %}
         {% if error %}
-        <p class="text-red-500">{{ error }}</p>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ error }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         {% endif %}
         <div class='d-flex justify-content-center align-items-center vh-100' >
             <form method="POST" class="custom-form p-4 border rounded bg-light shadow">

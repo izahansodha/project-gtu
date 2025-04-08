@@ -51,6 +51,7 @@ def user_logout(request):
     return redirect('login')
 
 
+@login_required
 def home(request):
     users = custumuser.objects.all()  # Fetch all users
     return render(request, 'home.html', {'users': users})

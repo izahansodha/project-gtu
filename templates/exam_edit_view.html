@@ -1,60 +1,111 @@
 {% extends "base.html" %}
-{% block content %}
-    {% if user.is_authenticated %}
-<!-- JavaScript alert for messages -->
-    <script>
-        window.onload = function() {
-            {% if messages %}
-                {% for message in messages %}
-                    alert("{{ message }}");
-                {% endfor %}
-            {% endif %}
-        };
-    </script>
 
-    <!-- Display all exams -->
-    <div class="col-md-10 offset-md-1">
-        <div class="d-flex justify-content-between align-items-center mt-3 mb-3"> <!-- Added this wrapper -->
-            <h3 class="m-0">Exams List</h3> <!-- m-0 removes default margin -->
-        </div>
-        <div class="clearfix"></div>
-        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-            <table class="table table-striped table-hover table-bordered">
-                <thead class='table-dark'>
-                    <tr>
-                        <th>Exam</th>
-                        <th>Date</th>
-                        <th>Session</th>
-                        <th>Time</th>
-                        <th>Edit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for exam in exam %}
-                    <tr>
-                        <td>{{ exam.id }}</td>
-                        <td>{{ exam.date }}</td>
-                        <td>{{ exam.session_id }}</td>
-                        <td>{{ exam.time_id }}</td>
-                        <td>
-                            <a class='btn btn-warning btn-sm' href='{% url "edit_exam" exam.id %}'>Edit</a>
-                        </td>
-                        
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7">No exams found.</td>
-                    </tr>
+{% block content %}
+{% if user.is_authenticated %}
+<style>
+    th.asc::after {
+        content: " 🔼";
+    }
+
+    th.desc::after {
+        content: " 🔽";
+    }
+</style>
+
+<script>
+    window.onload = function () {
+        {% if messages %}
+            {% for message in messages %}
+                alert("{{ message }}");
+            {% endfor %}
+        {% endif %}
+    };
+</script>
+
+<div class="container mt-4">
+    <div class="row">
+<!--        <div class="col-md-10 offset-md-1">-->
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0">Theory Exams Entry List</h3>
+            </div>
+
+            <!-- Dropdown -->
+            <form class="form-inline mb-3">
+                <label for="examSelect" class="me-2"><strong>Select Exam:</strong></label>
+                <select name="exam_id" id="examSelect"
+                        class="form-select w-auto d-inline-block"
+                        hx-get="{% url 'exam_views' %}"
+                        hx-target="#examTableBody"
+                        hx-swap="innerHTML"
+                        hx-trigger="change">
+                    <option value="">-- All Exams --</option>
+                    {% for e in exams_list %}
+                        <option value="{{ e.id }}">{{ e }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
+                </select>
+            </form>
+
+            <!-- Table -->
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-striped table-hover table-bordered w-100">
+                    <thead class='table-dark'>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Date</th>
+                            <th>Session</th>
+                            <th>Time</th>
+                            <th>Semester</th>
+                            <th>Duty Type</th>
+                            <th>Faculty</th>
+                            <th>Block</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="examTableBody">
+                        {% include "_exam_table_partial.html" %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+<!--</div>-->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('th').forEach(function (header, index) {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function () {
+                const table = header.closest('table');
+                const rows = Array.from(table.querySelectorAll('tbody > tr')).filter(r => r.querySelector('td'));
+                const isAscending = header.classList.contains('asc');
+
+                // Sort rows based on clicked column
+                rows.sort((a, b) => {
+                    const cellA = a.children[index].innerText.trim();
+                    const cellB = b.children[index].innerText.trim();
+
+                    return isAscending
+                        ? cellA.localeCompare(cellB, undefined, { numeric: true })
+                        : cellB.localeCompare(cellA, undefined, { numeric: true });
+                });
+
+                // Remove existing sort indicators from all headers
+                table.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+
+                // Set indicator on clicked header
+                header.classList.toggle('asc', !isAscending);
+                header.classList.toggle('desc', isAscending);
+
+                // Re-append sorted rows
+                rows.forEach(row => table.querySelector('tbody').appendChild(row));
+            });
+        });
+    });
+</script>
 
 
-
-    
-    {% else %}
-        <div class="alert alert-warning">You need to be logged in to view this page.</div>
-    {% endif %}
+{% else %}
+<div class="alert alert-warning">You need to be logged in to view this page.</div>
+{% endif %}
 {% endblock %}
