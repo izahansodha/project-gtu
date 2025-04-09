@@ -52,3 +52,16 @@ class GTUExamCPForm(forms.ModelForm):
                 field.widget.attrs['class'] = 'form-select'
             else:
                 field.widget.attrs['class'] = 'form-control'
+
+
+class InvoiceForm(forms.Form):
+    select_faculty = forms.ModelChoiceField(
+        queryset=faculty.objects.all(),
+        label="Select Faculty",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    select_exam = forms.ModelChoiceField(
+        queryset=exam_name.objects.all(),
+        label="Select Exam",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )

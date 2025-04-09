@@ -1,17 +1,151 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from .models import *
 from faculty.models import *
-from .forms import GTUExamDataForm, GTUExamCPForm
+from .forms import GTUExamDataForm, GTUExamCPForm,InvoiceForm
 from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from authenticate.decorators import role_required
 from django.template.loader import render_to_string
 from django.http import HttpResponse
+from django.db.models import F
+from num2words import num2words
+# views.py
+# # GTUEntry/views.py
+from django.http import HttpResponse
+from weasyprint import HTML
+from django.template.loader import get_template
+from django.template.loader import render_to_string
 
+
+
+def select_pdf(request):
+    if request.method == "POST":
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            faculty = form.cleaned_data['select_faculty']
+            exam = form.cleaned_data['select_exam'] 
+            fac = list(gtu_th_exam_data.objects.filter(faculty_id=faculty))
+            # Create a map of duty types and their payable amounts from exam_name
+            #role_amount = fac.duty_type_id.duty_type
+
+            duty_field_map = {
+                'GTU Coordinator': 'gtu_co',
+                'Center Incharge': 'center_incharge',
+                'Senior Supervisor': 'sr_sup',
+                'Junior Supervisor': 'jr_sup',
+                'Reliever Supervisor': 'st_sup',
+                'Numerator Supervisor': 'num_sup',
+                'Peon': 'peon',
+                'Stationary Peon': 'st_peon',
+                'Sweeper': 'sweeper',
+                'Paper Checking': 'page_amount',
+            }
+
+            # Add payable amounts to each duty object
+            total_amount = 0
+            for duty in fac:
+                duty_name = duty.duty_type_id.duty  # e.g., "Junior Supervisor"
+                exam_field = duty_field_map.get(duty_name)
+
+                if exam_field:
+                    payable_amount = getattr(exam, exam_field, 0)
+                else:
+                    payable_amount = 0
+
+                # Attach amount temporarily to each duty object
+                duty.payable_amount = payable_amount
+                total_amount += payable_amount
+            rows = []
+            for i in range(21):  # 1 to 21 on left, 22 to 42 on right
+                left = fac[i] if i < len(fac) else None
+                right = fac[i + 21] if (i + 21) < len(fac) else None
+
+                row = {
+                    "no_left": i + 1,
+                    "left": left,
+                    "no_right": i + 22,
+                    "right": right,
+                }
+                rows.append(row)
+
+            amount_in_words = num2words(total_amount, to='cardinal').title()
+
+            context = {
+                "faculty": faculty,
+                "exam": exam,
+                "rows": rows,
+                "fac": fac,
+                #"role_amount": role_amount,
+                "total_amount": total_amount,
+                "amount_in_words": amount_in_words,
+           }
+             # Render HTML to PDF
+
+
+            return render(request, 'pdf_genrate.html', context)
+    else:
+        form = InvoiceForm()
+    return render(request, 'print_pdf_selection.html', {'form': form})
 # def exam_data_view(request):
 #     form = GTUExamDataForm()
 #     return render(request, 'add_th_exam_entry.html', {'form': form})
+
+def download_pdf(request, faculty_id, exam_id):
+    faculty_obj = faculty.objects.get(id=faculty_id)
+    exam_obj = exam_name.objects.get(id=exam_id)
+    fac = list(gtu_th_exam_data.objects.filter(faculty_id=faculty_obj))
+
+    duty_field_map = {
+        'GTU Coordinator': 'gtu_co',
+        'Center Incharge': 'center_incharge',
+        'Senior Supervisor': 'sr_sup',
+        'Junior Supervisor': 'jr_sup',
+        'Reliever Supervisor': 'st_sup',
+        'Numerator Supervisor': 'num_sup',
+        'Peon': 'peon',
+        'Stationary Peon': 'st_peon',
+        'Sweeper': 'sweeper',
+        'Paper Checking': 'page_amount',
+    }
+
+    total_amount = 0
+    for duty in fac:
+        duty_name = duty.duty_type_id.duty
+        exam_field = duty_field_map.get(duty_name)
+        payable_amount = getattr(exam_obj, exam_field, 0) if exam_field else 0
+        duty.payable_amount = payable_amount
+        total_amount += payable_amount
+
+    rows = []
+    for i in range(21):
+        left = fac[i] if i < len(fac) else None
+        right = fac[i + 21] if (i + 21) < len(fac) else None
+        rows.append({
+            "no_left": i + 1, "left": left,
+            "no_right": i + 22, "right": right,
+        })
+
+    amount_in_words = num2words(total_amount, lang='en').capitalize() + " only"
+
+    context = {
+        "faculty": faculty_obj,
+        "exam": exam_obj,
+        "rows": rows,
+        "fac": fac,
+        "total_amount": total_amount,
+        "amount_in_words": amount_in_words,
+    }
+
+    html_string = get_template('pdfformat.html').render(context)
+    pdf = HTML(string=html_string).write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="gtu-invoice.pdf"'
+    return response
+
+
+
 
 @login_required()
 @role_required(['admin','gtu_cordinator'])
@@ -220,3 +354,12 @@ def edit_cp_exam(request, cp_id):
     else:
         form = GTUExamCPForm(instance=cp_obj)
     return render(request, 'edit_cp_exam.html', {'form': form})
+
+
+
+
+@login_required()
+@role_required(['admin', 'gtu_cordinator'])
+def pdf_genrate(request):
+    active_faculty = faculty.objects.filter(is_active=True).order_by('full_name')
+    return render(request,'pdf_genrate.html',{'form':active_faculty})

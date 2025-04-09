@@ -1,0 +1,79 @@
+<style>
+    body {
+        font-family: "Noto Sans Gujarati", sans-serif;
+        font-size: 12px;
+        margin: 20px;
+    }
+    .center {
+        text-align: center;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 10px;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+    }
+    .right {
+        text-align: right;
+        margin-top: 5px;
+    }
+    .footer {
+        margin-top: 15px;
+        font-size: 11px;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center">
+    <div>
+        <div class="center">
+            <h4 style="margin: 0;">Gujrat Technological University - Ahmedabad</h4>
+        </div>
+
+        <p><strong>Exam Center Name And Code :</strong> Goverment Polytechnic Junagadh (619)</p>
+        <p><strong>Exam Name :</strong> {{ exam.exam }} </p>
+        <p><strong>Faculty Name:</strong> {{ faculty.full_name }}</p>
+
+        <p><strong>Duty Type:</strong> {{ fac.0.duty_type_id }}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Payable Amount</th>
+                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Payable Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row.no_left }}</td>
+                    <td>{% if row.left %}{{ row.left.date|date:"d-m-y" }}{% endif %}</td>
+                    <td>{% if row.left %}{{ row.left.time_id }}{% endif %}</td>
+                    <td>{% if row.left %}{{ row.left.payable_amount }}{% endif %}</td>
+        
+                    <td>{{ row.no_right }}</td>
+                    <td>{% if row.right %}{{ row.right.date|date:"d-m-y" }}{% endif %}</td>
+                    <td>{% if row.right %}{{ row.right.time_id }}{% endif %}</td>
+                    <td>{% if row.right %}250{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+
+        <p class="right"><strong>Total Amount:</strong> ₹{{ total_amount }}</p>
+
+
+        <div class="footer center">
+            <p><strong>Amount in Words:</strong> {{ amount_in_words }}  Rupees Total</p>
+
+            <p class='right'>Faculty Sign ___________________</p>
+            <p><strong>Payable Amount :</strong> <u>{{ total_amount }}</u> {{ amount_in_words }} Total Given Amount</p>
+            
+            <p class='right' style="margin-top: 15px;">GTU Cordinator<br>Goverment Polytechnic Junagadh(619)</p>
+        </div>
+    </div>
+</div>

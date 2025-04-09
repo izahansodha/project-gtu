@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+   
+{% include "pdfformat.html" %}
+
+<form method="get" action="{% url 'download_pdf' faculty.id exam.id %}">
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary">Download PDF</button>
+    </div>
+    
+</form>
+
+
+{% endblock %}

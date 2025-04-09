@@ -12,6 +12,9 @@ class gtu_th_exam_data(models.Model):
     faculty_id = models.ForeignKey(faculty, on_delete=models.CASCADE)
     block = models.PositiveIntegerField(default=0)
 
+    def __str__(self):
+        return f"{self.exam_id}"
+
 
 class gtu_th_CP_data(models.Model):
     exam_id = models.ForeignKey(exam_name, on_delete=models.CASCADE)

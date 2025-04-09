@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class='d-flex justify-content-center align-items-center vh-100'>
+        <form method="POST" class="custom-form p-4 border rounded bg-light shadow" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center mb-4">Add Theory Exam Duty</h2>
+            </div>
+            {% csrf_token %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            {{ error }}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="{{ form.select_faculty.id_for_label }}" class="form-label">Select Faculty</label>
+                {{ form.select_faculty }}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.select_exam.id_for_label }}" class="form-label">Select Exam</label>
+                {{ form.select_exam }}
+            </div>
+            
+                     
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="{% url 'exam_views' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+
+{% endblock %}

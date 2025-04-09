@@ -51,7 +51,7 @@ class time(models.Model):
     time = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.time
+        return str(self.time)
 
 
 class duty_type(models.Model):
