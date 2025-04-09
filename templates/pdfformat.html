@@ -37,13 +37,11 @@
         <p><strong>Exam Center Name And Code :</strong> Goverment Polytechnic Junagadh (619)</p>
         <p><strong>Exam Name :</strong> {{ exam.exam }} </p>
         <p><strong>Faculty Name:</strong> {{ faculty.full_name }}</p>
-
-        <p><strong>Duty Type:</strong> {{ fac.0.duty_type_id }}</p>
         <table>
             <thead>
                 <tr>
-                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Payable Amount</th>
-                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Payable Amount</th>
+                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Role</th><th>Payable Amount</th>
+                    <th>No.</th><th>Date</th><th>Exam Time</th><th>Role</th><th>Payable Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,12 +50,14 @@
                     <td>{{ row.no_left }}</td>
                     <td>{% if row.left %}{{ row.left.date|date:"d-m-y" }}{% endif %}</td>
                     <td>{% if row.left %}{{ row.left.time_id }}{% endif %}</td>
+                    <td>{% if row.left %}{{ row.left.duty_type_id.duty }}{% endif %}</td>
                     <td>{% if row.left %}{{ row.left.payable_amount }}{% endif %}</td>
         
                     <td>{{ row.no_right }}</td>
                     <td>{% if row.right %}{{ row.right.date|date:"d-m-y" }}{% endif %}</td>
                     <td>{% if row.right %}{{ row.right.time_id }}{% endif %}</td>
-                    <td>{% if row.right %}250{% endif %}</td>
+                    <td>{% if row.left %}{{ row.right.duty_type_id.duty }}{% endif %}</td>
+                    <td>{% if row.right %}{{ row.right.payable_amount }}{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

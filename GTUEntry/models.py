@@ -13,7 +13,7 @@ class gtu_th_exam_data(models.Model):
     block = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.exam_id}"
+        return f"{self.exam_id} {self.faculty_id}"
 
 
 class gtu_th_CP_data(models.Model):

@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from .models import *
 from faculty.models import *
-from .forms import GTUExamDataForm, GTUExamCPForm,InvoiceForm
+from .forms import GTUExamDataForm, GTUExamCPForm,InvoiceForm,all_InvoiceForm
 from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -16,16 +16,20 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from django.template.loader import get_template
 from django.template.loader import render_to_string
+import io
+import zipfile
 
 
 
+@login_required()
+@role_required(['admin','gtu_cordinator'])
 def select_pdf(request):
     if request.method == "POST":
         form = InvoiceForm(request.POST)
         if form.is_valid():
             faculty = form.cleaned_data['select_faculty']
             exam = form.cleaned_data['select_exam'] 
-            fac = list(gtu_th_exam_data.objects.filter(faculty_id=faculty))
+            fac = list(gtu_th_exam_data.objects.filter(faculty_id=faculty,exam_id=exam))
             # Create a map of duty types and their payable amounts from exam_name
             #role_amount = fac.duty_type_id.duty_type
 
@@ -90,7 +94,8 @@ def select_pdf(request):
 # def exam_data_view(request):
 #     form = GTUExamDataForm()
 #     return render(request, 'add_th_exam_entry.html', {'form': form})
-
+@login_required()
+@role_required(['admin','gtu_cordinator'])
 def download_pdf(request, faculty_id, exam_id):
     faculty_obj = faculty.objects.get(id=faculty_id)
     exam_obj = exam_name.objects.get(id=exam_id)
@@ -139,12 +144,78 @@ def download_pdf(request, faculty_id, exam_id):
 
     html_string = get_template('pdfformat.html').render(context)
     pdf = HTML(string=html_string).write_pdf()
-
+    file_name = f"{faculty_obj.short_name}_{exam_obj}_invoice.pdf"
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="gtu-invoice.pdf"'
+    response['Content-Disposition'] = f'inline; filename="{file_name}"'
     return response
 
 
+@login_required()
+@role_required(['admin', 'gtu_cordinator'])
+def allpdf(request, exam_id):
+    exam_obj = exam_name.objects.get(id=exam_id)
+    faculty_list = faculty.objects.filter(
+        id__in=gtu_th_exam_data.objects.filter(exam_id=exam_obj).values_list('faculty_id', flat=True).distinct()
+    )
+
+    # ZIP file buffer
+    zip_buffer = io.BytesIO()
+    zip_file = zipfile.ZipFile(zip_buffer, 'w')
+
+    for fac in faculty_list:
+        # Get duty entries for this faculty in this exam
+        fac_duties = list(gtu_th_exam_data.objects.filter(faculty_id=fac, exam_id=exam_obj))
+
+        total_amount = 0
+        for duty in fac_duties:
+            duty_field_map = {
+                'GTU Coordinator': 'gtu_co',
+                'Center Incharge': 'center_incharge',
+                'Senior Supervisor': 'sr_sup',
+                'Junior Supervisor': 'jr_sup',
+                'Reliever Supervisor': 'st_sup',
+                'Numerator Supervisor': 'num_sup',
+                'Peon': 'peon',
+                'Stationary Peon': 'st_peon',
+                'Sweeper': 'sweeper',
+                'Paper Checking': 'page_amount',
+            }
+            duty_name = duty.duty_type_id.duty
+            exam_field = duty_field_map.get(duty_name)
+            duty.payable_amount = getattr(exam_obj, exam_field, 0) if exam_field else 0
+            total_amount += duty.payable_amount
+
+        # Split duties into left and right columns
+        rows = []
+        for i in range(21):
+            left = fac_duties[i] if i < len(fac_duties) else None
+            right = fac_duties[i+21] if (i+21) < len(fac_duties) else None
+            rows.append({"no_left": i + 1, "left": left, "no_right": i + 22, "right": right})
+
+        # Render to PDF
+        context = {
+            "faculty": fac,
+            "exam": exam_obj,
+            "rows": rows,
+            "fac": fac_duties,
+            "total_amount": total_amount,
+            "amount_in_words": num2words(total_amount, lang='en').capitalize() + " only"
+        }
+
+        html_string = get_template('pdfformat.html').render(context)
+        pdf = HTML(string=html_string).write_pdf()
+
+        file_name = f"{fac.short_name}_Duty_Report.pdf"
+        zip_file.writestr(file_name, pdf)
+
+    zip_file.close()
+    zip_buffer.seek(0)
+
+    response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="All_Faculty_Reports.zip"'
+    
+    return response          
+    
 
 
 @login_required()
@@ -175,6 +246,15 @@ def load_times(request):
     times = time.objects.filter(session_id=session_id).order_by('time')
     return render(request, 'times_dropdown.html', {'times': times})
 
+def select_exam_for_pdf(request):
+    if request.method == 'POST':
+        form = all_InvoiceForm(request.POST)
+        if form.is_valid():
+            selected_exam = form.cleaned_data['select_exam']
+            return redirect('generate_all_pdfs', exam_id=selected_exam.id)  # name of your URL pattern
+    else:
+        form = all_InvoiceForm()
+    return render(request, 'select_exam_pdf.html', {'form': form})
 
 # def load_faculty(request):
 #     search = request.GET.get('search', '')

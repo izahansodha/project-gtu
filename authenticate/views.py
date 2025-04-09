@@ -127,7 +127,6 @@ def update_record(request, pk):
 @role_required(['admin'])
 def edit_user(request, user_id):
     user = get_object_or_404(custumuser, id=user_id)  # Get user by ID
-
     if request.method == 'POST':
         form = CustomUserUpdateForm(request.POST, instance=user)
         if form.is_valid():

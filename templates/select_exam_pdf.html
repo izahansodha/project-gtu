@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <form method="post" id="pdfForm" class="custom-form p-4 border rounded bg-light shadow" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+    <h2>Select Exam to Generate PDFs</h2>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Generate PDF</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("pdfForm");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault(); // prevent normal form submission
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("PDF generation failed.");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "All_Faculty_Reports.zip";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        // ✅ Show success message after download
+        alert("PDFs downloaded successfully!");
+
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+  });
+</script>
+{% endblock %}
