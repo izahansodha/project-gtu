@@ -21,7 +21,7 @@ class gtu_th_CP_data(models.Model):
     date = models.DateField()
     session_id = models.ForeignKey(session, on_delete=models.CASCADE)
     semester_id = models.ForeignKey(semester, on_delete=models.CASCADE)
-
+    
     sub_1_code = models.CharField(max_length=10, blank=True, null=True)
     sub_1_name = models.CharField(max_length=50, blank=True, null=True)
     sub1_no_of_student = models.PositiveIntegerField(default=0, blank=True, null=True)

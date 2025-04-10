@@ -16,4 +16,6 @@ urlpatterns = [
     path('download-pdf/<int:faculty_id>/<int:exam_id>/',views.download_pdf , name='download_pdf'),
     path('select-exam/', views.select_exam_for_pdf, name='select_exam_for_pdf'),
     path('generate-all-pdfs/<int:exam_id>/', views.allpdf, name='generate_all_pdfs'),
+    path('select-exam-excel/', views.select_exam_for_excel, name='select_exam_excel'),
+    path('generate-excel/<int:exam_id>/', views.generate_excel, name='generate_excel'),
 ]

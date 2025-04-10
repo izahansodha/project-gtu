@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100">
+  
+  <form method="post" class="custom-form p-4 border rounded bg-light shadow" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+    <h2>Select Exam to Generate Excel</h2>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Download Excel</button>
+  </form>
+</div>
+{% endblock %}

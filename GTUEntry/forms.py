@@ -72,3 +72,11 @@ class all_InvoiceForm(forms.Form):
         label="Select Exam",
         widget=forms.Select(attrs={"class": "form-control"})
     )
+
+
+class ExamSelectForm(forms.Form):
+    exam = forms.ModelChoiceField(
+        queryset=exam_name.objects.all(),
+        label="Select Exam",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )

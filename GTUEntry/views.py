@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from .models import *
 from faculty.models import *
-from .forms import GTUExamDataForm, GTUExamCPForm,InvoiceForm,all_InvoiceForm
+from .forms import GTUExamDataForm, GTUExamCPForm,InvoiceForm,all_InvoiceForm,ExamSelectForm
 from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -18,6 +18,10 @@ from django.template.loader import get_template
 from django.template.loader import render_to_string
 import io
 import zipfile
+#exel file
+from openpyxl import Workbook
+from openpyxl.styles import Alignment
+from django.db.models import Count
 
 
 
@@ -80,7 +84,6 @@ def select_pdf(request):
                 "exam": exam,
                 "rows": rows,
                 "fac": fac,
-                #"role_amount": role_amount,
                 "total_amount": total_amount,
                 "amount_in_words": amount_in_words,
            }
@@ -283,6 +286,184 @@ def load_faculty(request):
     return render(request, 'faculty_dropdown.html', {
         'faculty_list': faculty_list.order_by('full_name')
     })
+@login_required
+@role_required(['admin', 'gtu_cordinator'])
+def select_exam_for_excel(request):
+    if request.method == 'POST':
+        form = ExamSelectForm(request.POST)
+        if form.is_valid():
+            selected_exam = form.cleaned_data['exam']
+            return redirect('generate_excel', exam_id=selected_exam.id)
+    else:
+        form = ExamSelectForm()
+    return render(request, 'select_exam_excel.html', {'form': form})
+
+
+@login_required
+@role_required(['admin', 'gtu_cordinator'])
+def generate_excel(request, exam_id):
+    exam_obj = exam_name.objects.get(id=exam_id)
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "GTU CP BILL DATA"
+
+    # Title Header
+    ws.merge_cells('A1:V1')
+    ws['A1'] = "GTU CP BILL DATA (WINTER-2024)"
+    ws['A1'].alignment = Alignment(horizontal="center")
+
+    headers = [
+        "Sr.No", "Date", "Session", "Sem", "NoofStud", "No of Block", 
+        "Center Incharrge", "GTU Cordinator", "Sr.Sup", "Jr.Sup",
+        "St.Cum Relsup", "NumCum RelSup", "Peon", "St.Cum NoPeon",
+        "Swp", "Total Pages", "Page Amount",
+        "Center Incharrge", "GTU Cordinator", "Sr.Sup", "Jr.Sup",
+        "St.Cum Relsup", "NumCum RelSup", "Peon", "St.Cum NoPeon",
+        "Swp", "TOTAL",
+    ]
+    ws.append(headers)
+    total_of_all_rows = 0
+
+    grouped_data = gtu_th_CP_data.objects.filter(exam_id=exam_obj).values(
+        'date', 'session_id', 'semester_id'
+    ).distinct()
+
+    for idx, group in enumerate(grouped_data, start=1):
+        date = group['date']
+        session_id = group['session_id']
+        semester_id = group['semester_id']
+
+        # Get actual related objects
+        session_obj = session.objects.get(id=session_id)
+        semester_obj = semester.objects.get(id=semester_id)
+
+        # Duty counts per type
+        summary = gtu_th_exam_data.objects.filter(
+            exam_id=exam_obj,
+            date=date,
+            session_id=session_obj,
+            semester_id=semester_obj
+        ).values(
+            'duty_type_id__duty'
+        ).annotate(
+            count=Count('id')
+        )
+
+        roles = {
+            "Center Incharge": 0,
+            "GTU Coordinator": 0,
+            "Senior Supervisor": 0,
+            "Junior Supervisor": 0,
+            "Reliever Supervisor": 0,
+            "Numbering Supervisor": 0,
+            "Peon": 0,
+            "Stationary Peon": 0,
+            "Sweeper": 0
+        }
+
+        for item in summary:
+            duty = item['duty_type_id__duty']
+            if duty in roles:
+                roles[duty] = item['count']
+
+        # Fetch CP data for total pages and students
+        get_a_ob = gtu_th_CP_data.objects.filter(
+            exam_id=exam_obj,
+            date=date,
+            session_id=session_obj,
+            semester_id=semester_obj
+        )
+
+        total_students = 0
+        total_pages = 0  # Initialize total_pages before usage
+        
+        for obj in get_a_ob:
+            total_pages += obj.total_pages or 0
+            print(f"✅ Processing CP data ID: {obj.id}")
+            for i in range(1, 13):
+                students = getattr(obj, f"sub{i}_no_of_student", 0) or 0
+                print(f"   sub{i}_no_of_student = {students}")
+                total_students += students
+        print(f"\n🎯 Total Students: {total_students}")
+
+        # Calculate the page amount based on total pages
+        page_amount = total_pages * exam_obj.page_amount if total_pages else 0
+
+        # Calculate total amounts for each role by multiplying the count by the rate from `exam_name`
+        center_incharge_amount = roles["Center Incharge"] * exam_obj.center_incharge
+        gtu_co_amount = roles["GTU Coordinator"] * exam_obj.gtu_co
+        sr_sup_amount = roles["Senior Supervisor"] * exam_obj.sr_sup
+        jr_sup_amount = roles["Junior Supervisor"] * exam_obj.jr_sup
+        st_sup_amount = roles["Reliever Supervisor"] * exam_obj.st_sup
+        num_sup_amount = roles["Numbering Supervisor"] * exam_obj.num_sup
+        peon_amount = roles["Peon"] * exam_obj.peon
+        st_peon_amount = roles["Stationary Peon"] * exam_obj.st_peon
+        sweeper_amount = roles["Sweeper"] * exam_obj.sweeper
+
+        # Calculate total amount (sum of all role amounts and page amount)
+        total_amount = (
+            center_incharge_amount +
+            gtu_co_amount +
+            sr_sup_amount +
+            jr_sup_amount +
+            st_sup_amount +
+            num_sup_amount +
+            peon_amount +
+            st_peon_amount +
+            sweeper_amount +
+            page_amount
+        )
+        total_of_all_rows += total_amount
+
+        # Create the row with all required information
+        row = [
+            idx,
+            date.strftime("%d-%m-%Y"),
+            session_obj.session,
+            semester_obj.sem,
+            total_students,
+            roles["Junior Supervisor"],  # Assuming this = No of Block
+            roles["Center Incharge"],
+            roles["GTU Coordinator"],
+            roles["Senior Supervisor"],
+            roles["Junior Supervisor"],
+            roles["Reliever Supervisor"],
+            roles["Numbering Supervisor"],
+            roles["Peon"],
+            roles["Stationary Peon"],
+            roles["Sweeper"],
+            total_pages,
+            page_amount,
+            center_incharge_amount,
+            gtu_co_amount,
+            sr_sup_amount,
+            jr_sup_amount,
+            st_sup_amount,
+            num_sup_amount,
+            peon_amount,
+            st_peon_amount,
+            sweeper_amount,
+            total_amount,
+        ]
+
+        # Append the row to the worksheet
+        ws.append(row)
+    total_row = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Ov.Total", total_of_all_rows]
+    ws.append(total_row)
+    # Prepare the response for file download
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    dynamic_filename = f"gtu_cp_bill_{exam_obj.exam}_{date.strftime('%d-%m-%Y')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{dynamic_filename}"'
+    wb.save(response)
+    return response
+
+
+
+
+
+
 
 
 # @login_required()
